@@ -1,8 +1,8 @@
 &emsp;
-# Dataset
-## 1 TUM
+# TUM
 - [TUM数据集](https://cvg.cit.tum.de/data/datasets/rgbd-dataset/download)
 - [associate.py](https://cvg.cit.tum.de/data/datasets/rgbd-dataset/tools): 目的是从rgb.txt 文件和 depth.txt 文件中读取时间戳，并通过查找最佳匹配来连接它们
+
 >修改 associate.py
 ```py
 for diff, a, b in potential_matches:
@@ -25,8 +25,10 @@ python associate.py \
 >运行 ORB-SLAM3
 ```sh
 # TUM RGB-D
-./Examples/RGB-D/rgbd_tum \
-Vocabulary/ORBvoc.txt \
-./Examples/RGB-D/TUM1.yaml \
-/home/nerf/datav/Dataset/TUM/rgbd_dataset_freiburg1_desk \
+./Examples/Stereo-Inertial/stereo_inertial_euroc \
+./Vocabulary/ORBvoc.txt \
+./Examples/Stereo-Inertial/EuRoC.yaml \
+${dir}/MH01 \
+./Examples/Stereo-Inertial/EuRoC_TimeStamps/MH01.txt \
+dataset-MH01_stereoi
 ```

@@ -8,6 +8,5 @@ exec
 
 # Folders
 objs
-.vscode
 lib
 Test

@@ -1,6 +1,6 @@
 &emsp;
 # IMU 数据解析
-以 Euroc 为例: .../Dataset/EuRoc/MH01/mav0/imu0
+
 
 >相关术语
 - ACC: 加速度传感器(accelerometer)

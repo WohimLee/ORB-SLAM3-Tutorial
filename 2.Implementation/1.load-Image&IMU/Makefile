@@ -2,7 +2,7 @@ include mks/OpenCV.mk
 
 MAIN := ./Examples/mono_inertial_euroc.cc
 TARGET := $(basename $(notdir $(MAIN)))
-ORB := lib/liborb.so
+ORB := lib/libORB_SLAM3.so
 
 
 cc_srcs := $(shell find src -name "*.cc")

@@ -35,14 +35,15 @@ int main(int argc, char** argv)
     }
     // Load all sequences:
     int seq;
-    vector< vector<string> > vstrImageFilenames;
-    vector< vector<double> > vTimestampsCam;
-    vector< vector<cv::Point3f> > vAcc, vGyro;
-    vector< vector<double> > vTimestampsImu;
-    vector<int> nImages;
-    vector<int> nImu;
+    vector< vector<string> > vstrImageFilenames; // 2D-vector, 每个seq的所有images路径
+    vector< vector<double> > vTimestampsCam;     // 2D-vector, 每个seq的所有时间戳
+    vector< vector<cv::Point3f> > vAcc, vGyro;   // 2D-vector, 每个seq的所有IMU数据
+    vector< vector<double> > vTimestampsImu;     // 2D-vector, 每个seq的所有IMU时间戳
+    vector<int> nImages; // 图片数量
+    vector<int> nImu;    // IMU 数据条数
     vector<int> first_imu(num_seq,0);
 
+    // 把所有 vector 容器 resize 成 seq 的数量
     vstrImageFilenames.resize(num_seq);
     vTimestampsCam.resize(num_seq);
     vAcc.resize(num_seq);
@@ -98,21 +99,20 @@ void LoadImages(const string &strImagePath, const string &strPathTimes,
 {
     ifstream fTimes;
     fTimes.open(strPathTimes.c_str());
-    vTimeStamps.reserve(5000);
-    vstrImages.reserve(5000);
-    while(!fTimes.eof())
+    vTimeStamps.reserve(5000); // MH01 大概有 3000 多条数据
+    vstrImages.reserve(5000);  // 多留点可以避免动态内存分配这种重操作
+    while(!fTimes.eof()) // End of File 判断是否读完所有内容
     {
         string s;
-        getline(fTimes,s);
-        if(!s.empty())
+        getline(fTimes,s); // 按行读取
+        if(!s.empty()) // 内容非空
         {
-            stringstream ss;
-            ss << s;
-            vstrImages.push_back(strImagePath + "/" + ss.str() + ".png");
+            stringstream ss; // stringstream 可以用于类型转换
+            ss << s; // 
+            vstrImages.push_back(strImagePath + "/" + ss.str() + ".png"); // 拼接每一张图片路径
             double t;
-            ss >> t;
-            vTimeStamps.push_back(t/1e9);
-
+            ss >> t; // stringstream 将数据转换成 double 型
+            vTimeStamps.push_back(t/1e9); // 纳秒转换成秒
         }
     }
 }
@@ -128,6 +128,7 @@ void LoadIMU(const string &strImuPath, vector<double> &vTimeStamps, vector<cv::P
     while(!fImu.eof())
     {
         string s;
+        // 读取每一行, 存到 s
         getline(fImu,s);
         if (s[0] == '#')
             continue;
@@ -136,17 +137,19 @@ void LoadIMU(const string &strImuPath, vector<double> &vTimeStamps, vector<cv::P
         {
             string item;
             size_t pos = 0;
-            double data[7];
+            double data[7]; // 时间戳 
             int count = 0;
+            // 对 getline 得到的每一行数据逐个读取
             while ((pos = s.find(',')) != string::npos) {
-                item = s.substr(0, pos);
-                data[count++] = stod(item);
-                s.erase(0, pos + 1);
+                item = s.substr(0, pos); // 从开始到 , 的内容
+                data[count++] = stod(item); // 转换成 double 存入data[7]
+                s.erase(0, pos + 1); // 删除已读取的数据
             }
-            item = s.substr(0, pos);
+            item = s.substr(0, pos); // 最后一个数据
             data[6] = stod(item);
 
-            vTimeStamps.push_back(data[0]/1e9);
+            vTimeStamps.push_back(data[0]/1e9); // 纳秒转成秒
+            // 分别存入对应的 Acc 和 Gyro 容器
             vAcc.push_back(cv::Point3f(data[4],data[5],data[6]));
             vGyro.push_back(cv::Point3f(data[1],data[2],data[3]));
         }

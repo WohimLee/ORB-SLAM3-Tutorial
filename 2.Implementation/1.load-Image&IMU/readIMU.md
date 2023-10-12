@@ -1,11 +1,13 @@
 &emsp;
-# IMU 数据解析
+# IMU 数据读取
 
 
 >相关术语
 - ACC: 加速度传感器(accelerometer)
 - GYRO: 陀螺仪
 - MAG: 磁力计或地磁传感器(magnetometer)
+
+
 >data.csv
 - 时间戳: timestamp [ns]
 - GYRO: 

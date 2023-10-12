@@ -6,15 +6,6 @@
 #include <opencv2/core/core.hpp> // cv::Point3f
 using namespace std;
 
-void LoadImages(const string &strImagePath, const string &strPathTimes,
-                vector<string> &vstrImages, vector<double> &vTimeStamps);
-
-void LoadIMU(const string &strImuPath, 
-             vector<double> &vTimeStamps, 
-             vector<cv::Point3f> &vAcc, 
-             vector<cv::Point3f> &vGyro);
-
-
 int main(int argc, char** argv)
 {
     if(argc < 5)
@@ -43,7 +34,8 @@ int main(int argc, char** argv)
     vector<int> nImu;
     vector<int> first_imu(num_seq,0);
 
-    vstrImageFilenames.resize(num_seq);
+    // 以下 vector 容器全部按照 seq 的数量 resize
+    vstrImageFilenames.resize(num_seq); 
     vTimestampsCam.resize(num_seq);
     vAcc.resize(num_seq);
     vGyro.resize(num_seq);
@@ -52,110 +44,5 @@ int main(int argc, char** argv)
     nImu.resize(num_seq);
 
     int tot_images = 0;
-    for (seq = 0; seq<num_seq; seq++)
-    {
-
-        string pathSeq(argv[(2*seq) + 3]);
-        string pathTimeStamps(argv[(2*seq) + 4]);
-
-        string pathCam0 = pathSeq + "/mav0/cam0/data";
-        string pathImu = pathSeq + "/mav0/imu0/data.csv";
-        // Check the path and filename
-        printf("pathSeq       : %s\n", pathSeq.c_str());
-        printf("pathTimeStamps: %s\n", pathTimeStamps.c_str());
-        printf("pathCam0      : %s\n", pathCam0.c_str());
-        printf("pathImu       : %s\n", pathImu.c_str());
-
-        cout << "Loading images for sequence " << seq << "...";
-        LoadImages(pathCam0, pathTimeStamps, vstrImageFilenames[seq], vTimestampsCam[seq]);
-        cout << "LOADED!" << endl;
-
-        cout << "Loading IMU for sequence " << seq << "...";
-        LoadIMU(pathImu, vTimestampsImu[seq], vAcc[seq], vGyro[seq]);
-        cout << "LOADED!" << endl;
-
-        nImages[seq] = vstrImageFilenames[seq].size(); // 每个 seq 的图片数量
-        tot_images += nImages[seq]; // 所有 seq 图片数量的总和
-        nImu[seq] = vTimestampsImu[seq].size(); // 每个 seq 包含的 IMU 数据条数
-
-        if((nImages[seq]<=0)||(nImu[seq]<=0))
-        {
-            cerr << "ERROR: Failed to load images or IMU for sequence" << seq << endl;
-            return 1;
-        }
-
-        // Find first imu to be considered, supposing imu measurements start first
-        while(vTimestampsImu[seq][first_imu[seq]]<=vTimestampsCam[seq][0])
-            first_imu[seq]++;
-        first_imu[seq]--; // first imu measurement to be considered
-
-    }
 }
-
-
-void LoadImages(const string &strImagePath, const string &strPathTimes,
-                vector<string> &vstrImages, vector<double> &vTimeStamps)
-{
-    ifstream fTimes;
-    fTimes.open(strPathTimes.c_str());
-    vTimeStamps.reserve(5000);
-    vstrImages.reserve(5000);
-    while(!fTimes.eof())
-    {
-        string s;
-        getline(fTimes,s);
-        if(!s.empty())
-        {
-            stringstream ss;
-            ss << s;
-            vstrImages.push_back(strImagePath + "/" + ss.str() + ".png");
-            double t;
-            ss >> t;
-            vTimeStamps.push_back(t/1e9);
-
-        }
-    }
-}
-
-void LoadIMU(const string &strImuPath, vector<double> &vTimeStamps, vector<cv::Point3f> &vAcc, vector<cv::Point3f> &vGyro)
-{
-    ifstream fImu;
-    fImu.open(strImuPath.c_str());
-    vTimeStamps.reserve(5000);
-    vAcc.reserve(5000);
-    vGyro.reserve(5000);
-
-    while(!fImu.eof())
-    {
-        string s;
-        getline(fImu,s);
-        if (s[0] == '#')
-            continue;
-
-        if(!s.empty())
-        {
-            string item;
-            size_t pos = 0;
-            double data[7];
-            int count = 0;
-            while ((pos = s.find(',')) != string::npos) {
-                item = s.substr(0, pos);
-                data[count++] = stod(item);
-                s.erase(0, pos + 1);
-            }
-            item = s.substr(0, pos);
-            data[6] = stod(item);
-
-            vTimeStamps.push_back(data[0]/1e9);
-            vAcc.push_back(cv::Point3f(data[4],data[5],data[6]));
-            vGyro.push_back(cv::Point3f(data[1],data[2],data[3]));
-        }
-    }
-}
-
-
-
-
-
-
 

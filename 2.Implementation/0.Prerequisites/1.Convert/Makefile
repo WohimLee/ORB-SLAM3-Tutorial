@@ -1,4 +1,6 @@
 include mks/OpenCV.mk
+include mks/Sophus.mk
+
 
 MAIN := ./Examples/main.cc
 TARGET := $(basename $(notdir $(MAIN)))
@@ -8,7 +10,7 @@ ORB := lib/libORB_SLAM3.so
 cc_srcs := $(shell find src -name "*.cc")
 cc_objs := $(patsubst src/%.cc,objs/%.o,$(cc_srcs))
 
-include_dirs := $(OpenCV_INCLUDE)
+include_dirs := $(OpenCV_INCLUDE) $(Sophus_INCLUDE)
 linking_libs := $(OpenCV_LIBS)
 
 static_lib_dirs  := $(OpenCV_LIB_DIR)

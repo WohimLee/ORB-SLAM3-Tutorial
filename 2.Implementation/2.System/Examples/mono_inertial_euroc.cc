@@ -64,10 +64,11 @@ int main(int argc, char** argv)
         string pathCam0 = pathSeq + "/mav0/cam0/data";
         string pathImu = pathSeq + "/mav0/imu0/data.csv";
         // Check the path and filename
-        printf("pathSeq       : %s\n", pathSeq.c_str());
-        printf("pathTimeStamps: %s\n", pathTimeStamps.c_str());
-        printf("pathCam0      : %s\n", pathCam0.c_str());
-        printf("pathImu       : %s\n", pathImu.c_str());
+        printf("Please check the path: \n");
+        printf("    pathSeq       : %s\n", pathSeq.c_str());
+        printf("    pathTimeStamps: %s\n", pathTimeStamps.c_str());
+        printf("    pathCam0      : %s\n", pathCam0.c_str());
+        printf("    pathImu       : %s\n", pathImu.c_str());
 
         cout << "Loading images for sequence " << seq << "...";
         LoadImages(pathCam0, pathTimeStamps, vstrImageFilenames[seq], vTimestampsCam[seq]);

@@ -2,11 +2,13 @@
 #define SYSTEM_H
 
 #include <string>
+#include <Eigen/Core> // EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 using namespace std;
 
 namespace ORB_SLAM3
 {
+class Viewer;
 class System
 {
 public:
@@ -21,10 +23,27 @@ public:
     };
 
 public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     // Initialize the SLAM system. It launches the Local Mapping, Loop Closing and Viewer threads.
     System(const string &strVocFile, const string &strSettingsFile, const eSensor sensor, const bool bUseViewer = true, const int initFr = 0, const string &strSequence = std::string());
 
+private:
+    // Input sensor
+    eSensor mSensor;
 
+    // The viewer draws the map and the current camera pose. It uses Pangolin.
+    Viewer* mpViewer;
+
+    // Reset flag
+    bool mbReset;
+    bool mbResetActiveMap;
+
+    // Change mode flags
+    bool mbActivateLocalizationMode;
+    bool mbDeactivateLocalizationMode;
+
+    // Shutdown flag
+    bool mbShutDown;
 };
 }
 

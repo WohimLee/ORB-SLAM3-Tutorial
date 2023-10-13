@@ -5,6 +5,7 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "./include/**",
+                "/usr/include/**",
                 "/home/nerf/datav/3rdParty/opencv-4.5.1/include/opencv4/**"
             ],
             "defines": [],

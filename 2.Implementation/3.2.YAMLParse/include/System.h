@@ -46,6 +46,11 @@ private:
 
     // Shutdown flag
     bool mbShutDown;
+
+    //
+    string mStrLoadAtlasFromFile;
+    string mStrSaveAtlasToFile;
+    
     Settings* settings_;
 
 };

@@ -3,6 +3,7 @@
 
 #include <string>
 #include <Eigen/Core> // EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+#include<opencv2/core/core.hpp> // cv::FileStorage, cv::FileNode
 
 using namespace std;
 

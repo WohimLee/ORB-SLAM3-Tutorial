@@ -4,6 +4,8 @@
 #include <vector>
 #include <string>
 #include <opencv2/core/core.hpp> // cv::Point3f
+
+#include "System.h"
 using namespace std;
 
 void LoadImages(const string &strImagePath, const string &strPathTimes,
@@ -91,10 +93,10 @@ int main(int argc, char** argv)
         first_imu[seq]--; // first imu measurement to be considered
     }
     // Vector for tracking time statistics
-    vector<float> vTimesTrack;
-    vTimesTrack.resize(tot_images);
+    vector<float> vTimesTrack; // TODO
+    vTimesTrack.resize(tot_images); 
 
-    cout.precision(17);
+    cout.precision(17); // TODO
 
     // Create SLAM system. It initializes all system threads and gets ready to process frames.
     // ORB_SLAM3::System SLAM(argv[1],argv[2],ORB_SLAM3::System::IMU_MONOCULAR, true);

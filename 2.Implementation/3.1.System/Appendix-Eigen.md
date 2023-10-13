@@ -1,3 +1,0 @@
-&emsp;
-# Appendix - Eigen
-

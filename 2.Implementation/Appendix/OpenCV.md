@@ -1,5 +1,5 @@
 &emsp;
-# Appendix - OpenCV
+# OpenCV
 
 ## cv::FileStorage
 OpenCV 提供了一种序列化和反序列化的机制，用于将不同数据类型的数据以 YAML 或 XML 格式写入磁盘或者从磁盘读取。这种方法可以用来加载或者保存任何 OpenCV 的数值变量（包括基本数据变量，像 int 和 float 等）到一个文件中

@@ -1,8 +1,9 @@
 include mks/OpenCV.mk
 include mks/Sophus.mk
+include mks/g2o.mk
 
 
-MAIN := ./Examples/main.cc
+MAIN := ./Examples/example1.cc
 TARGET := $(basename $(notdir $(MAIN)))
 ORB := lib/libORB_SLAM3.so
 
@@ -10,20 +11,18 @@ ORB := lib/libORB_SLAM3.so
 cc_srcs := $(shell find src -name "*.cc")
 cc_objs := $(patsubst src/%.cc,objs/%.o,$(cc_srcs))
 
-include_dirs := $(OpenCV_INCLUDE) $(Sophus_INCLUDE)
+include_dirs := ./include /usr/include/eigen3 $(OpenCV_INCLUDE) $(Sophus_INCLUDE) $(g2o_INCLUDE)
 linking_libs := $(OpenCV_LIBS)
-
-static_lib_dirs  := $(OpenCV_LIB_DIR)
-dynamic_lib_dirs := $(OpenCV_LIB_DIR)
+library_dirs := ./lib $(OpenCV_LIB_DIR)
 
 I_options := $(include_dirs:%=-I%)
 l_options := $(linking_libs:%=-l%)
-L_options := $(static_lib_dirs:%=-L%)
-r_options := $(dynamic_lib_dirs:%=-Wl,-rpath=%)
+L_options := $(library_dirs:%=-L%)
+r_options := $(library_dirs:%=-Wl,-rpath=%)
 
 
-compile_options := -std=c++11 -fPIC $(I_options)
-linking_options := $(l_options) $(L_options) $(r_options)
+compile_options := -std=c++11 -fPIC -w $(I_options)
+linking_options := $(l_options) $(L_options) $(r_options) -lORB_SLAM3
 
 # Compile ORB lib
 objs/%.o : src/%.cc
@@ -43,13 +42,10 @@ objs/$(TARGET).o : $(MAIN)
 	@mkdir -p $(dir $@)
 	@g++ -c $< -o $@ $(compile_options)
 
-Examples/$(TARGET) : objs/$(TARGET).o 
+Examples/$(TARGET) : objs/$(TARGET).o $(ORB)
 	@echo [INFO]: Link $^ to $@
 	@mkdir -p $(dir $@)
-	@g++ $^ -o $@ $(linking_options)
-
-
-
+	@g++ $< -o $@ $(linking_options)
 
 
 run : Examples/$(TARGET)
@@ -61,7 +57,7 @@ run : Examples/$(TARGET)
 		dataset-MH01_monoi
 
 clean :
-	@rm -rf objs Examples/$(TARGET)
+	@rm -rf objs lib Examples/$(TARGET)
 
 debug :
 	@echo $(OpenCV_LIBS)

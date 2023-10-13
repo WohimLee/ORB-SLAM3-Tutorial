@@ -4,7 +4,7 @@
 #define CONVERTER_H
 
 #include<opencv2/core/core.hpp>
-
+#include <Eigen/Core> // EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 #include<Eigen/Dense>
 #include"Thirdparty/g2o/g2o/types/types_six_dof_expmap.h"
 #include"Thirdparty/g2o/g2o/types/types_seven_dof_expmap.h"
@@ -14,7 +14,6 @@
 
 namespace ORB_SLAM3
 {
-
 class Converter
 {
 public:
@@ -57,8 +56,8 @@ public:
     //TODO: Sophus migration, to be deleted in the future
     static Sophus::SE3<float> toSophus(const cv::Mat& T);
     static Sophus::Sim3f toSophus(const g2o::Sim3& S);
-};
+}; // class Converter
 
-}// namespace ORB_SLAM
+} // namespace ORB_SLAM
 
 #endif // CONVERTER_H

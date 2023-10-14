@@ -26,6 +26,7 @@
 #include "Settings.h"
 #include "MapPoint.h"
 
+using namespace std;
 
 namespace ORB_SLAM3
 {

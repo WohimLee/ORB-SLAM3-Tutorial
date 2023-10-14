@@ -3,6 +3,7 @@
 #include <fstream> // ifstream, getline
 #include <vector>
 #include <string>
+#include <unistd.h> // usleep
 #include <opencv2/core/core.hpp> // cv::Point3f
 #include <opencv2/imgcodecs.hpp> // cv::imread, cv::IMREAD_UNCHANGED
 #include <opencv2/imgproc.hpp>   // cv::resize
@@ -20,7 +21,7 @@ void LoadIMU(const string &strImuPath,
              vector<cv::Point3f> &vAcc, 
              vector<cv::Point3f> &vGyro);
 
-
+double ttrack_tot = 0; // 计算追踪时间
 int main(int argc, char** argv)
 {
     if(argc < 5)
@@ -39,17 +40,17 @@ int main(int argc, char** argv)
         file_name = string(argv[argc-1]);
         cout << "file name: " << file_name << endl;
     }
-    // Load all sequences:
+    // ############### Load all sequences ###############
     int seq;
     vector< vector<string> > vstrImageFilenames; // 2D-vector, 每个seq的所有images路径
-    vector< vector<double> > vTimestampsCam;     // 2D-vector, 每个seq的所有时间戳
+    vector< vector<double> > vTimestampsCam;     // 2D-vector, 每个seq的所有时间戳, 单位: 秒
     vector< vector<cv::Point3f> > vAcc, vGyro;   // 2D-vector, 每个seq的所有IMU数据
-    vector< vector<double> > vTimestampsImu;     // 2D-vector, 每个seq的所有IMU时间戳
+    vector< vector<double> > vTimestampsImu;     // 2D-vector, 每个seq的所有IMU时间戳, 单位: 秒
     vector<int> nImages; // 图片数量
     vector<int> nImu;    // IMU 数据条数
     vector<int> first_imu(num_seq,0); 
 
-    // 把所有 vector 容器 resize 成 seq 的数量
+    // ############### 把所有 vector 容器resize成seq的数量 ###############
     vstrImageFilenames.resize(num_seq);
     vTimestampsCam.resize(num_seq);
     vAcc.resize(num_seq);
@@ -68,7 +69,8 @@ int main(int argc, char** argv)
 
         string pathCam0 = pathSeq + "/mav0/cam0/data";
         string pathImu = pathSeq + "/mav0/imu0/data.csv";
-        // Check the path and filename
+
+        // ############### Check the path and filename ###############
         printf("pathSeq       : %s\n", pathSeq.c_str());
         printf("pathTimeStamps: %s\n", pathTimeStamps.c_str());
         printf("pathCam0      : %s\n", pathCam0.c_str());
@@ -114,17 +116,16 @@ int main(int argc, char** argv)
     int proccIm=0;
     for (seq = 0; seq<num_seq; seq++)
     {
-
         // Main loop
         cv::Mat im;
-        vector<ORB_SLAM3::IMU::Point> vImuMeas;
+        vector<ORB_SLAM3::IMU::Point> vImuMeas; // vector IMU measurements 测量结果
         proccIm = 0;
         for(int ni=0; ni<nImages[seq]; ni++, proccIm++)
         {
             // 从之前存的图片路径vector取图片读取
             im = cv::imread(vstrImageFilenames[seq][ni],cv::IMREAD_UNCHANGED); //CV_LOAD_IMAGE_UNCHANGED);
 
-            double tframe = vTimestampsCam[seq][ni];
+            double tframe = vTimestampsCam[seq][ni]; // tframe 是时间戳
 
             if(im.empty()) // 读取失败判断
             {
@@ -140,9 +141,8 @@ int main(int argc, char** argv)
                 cv::resize(im, im, cv::Size(width, height));
             }
 
-            // Load imu measurements from previous frame
+            // ############### 把 ni 帧前的所有 IMU 数据读入 vImuMeas ###############
             vImuMeas.clear();
-
             if(ni>0)
             {
                 while(vTimestampsImu[seq][first_imu[seq]]<=vTimestampsCam[seq][ni])
@@ -159,24 +159,28 @@ int main(int argc, char** argv)
             // Pass the image to the SLAM system
             // cout << "tframe = " << tframe << endl;
             SLAM.TrackMonocular(im,tframe,vImuMeas); // TODO change to monocular_inertial
+            sleep(2); // 模拟Tracking过程, 假设需要2s
+            printf("%4d/%d: tframe: %lf, vTimestampsCam[seq][ni]:%lf\n", ni, nImages[seq], tframe, vTimestampsCam[seq][ni]);
 
             std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
 
             double ttrack= std::chrono::duration_cast<std::chrono::duration<double> >(t2 - t1).count();
+            printf("Tracking Time Cost: %lfs\n\n", ttrack);
             ttrack_tot += ttrack;
             // std::cout << "ttrack: " << ttrack << std::endl;
 
             vTimesTrack[ni]=ttrack;
 
-            // Wait to load the next frame
-            double T=0;
-            if(ni<nImages[seq]-1)
+            // ############### 等待下一帧 ###############
+            double T=0; // 计算每两帧之间, 时间戳上的间隔
+            if(ni<nImages[seq]-1) // 整个seq的除了最后一帧, 其它image都执行
                 T = vTimestampsCam[seq][ni+1]-tframe;
-            else if(ni>0)
+            else if(ni>0) // 针对最后一帧
                 T = tframe-vTimestampsCam[seq][ni-1];
 
+            // TODO: 如果Tracking时间小于两帧间隔时间, 需要等待?
             if(ttrack<T)
-                usleep((T-ttrack)*1e6); // 1e6
+                usleep((T-ttrack)*1e6); // 1 seconds = 1e6 microseconds
         }
         if(seq < num_seq - 1)
         {

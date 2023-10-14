@@ -5,6 +5,8 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "include/**",
+                "/usr/include/eigen3/**",
+                "/home/nerf/datav/SLAM/ORB_SLAM3/Thirdparty/Sophus/**",
                 "/home/nerf/datav/3rdParty/opencv-4.5.1/include/opencv4/**"
             ],
             "defines": [],

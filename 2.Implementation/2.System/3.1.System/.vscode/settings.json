@@ -3,6 +3,7 @@
         "*.cu": "*.cpp",
         "*.py": "python",
         "config": "django-html",
-        "fstream": "cpp"
+        "fstream": "cpp",
+        "chrono": "cpp"
     }
 }

@@ -1,0 +1,5 @@
+#ifndef ORBVOCABULARY_H
+#define ORBVOCABULARY_H
+
+
+#endif // ORBVOCABULARY_H

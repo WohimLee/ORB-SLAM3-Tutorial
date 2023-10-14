@@ -1,5 +1,0 @@
-&emsp;
-# Appendix - OpenCV
-
-
-

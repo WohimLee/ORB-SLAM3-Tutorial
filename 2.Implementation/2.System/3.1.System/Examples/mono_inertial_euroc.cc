@@ -3,9 +3,14 @@
 #include <fstream> // ifstream, getline
 #include <vector>
 #include <string>
+#include <unistd.h> // usleep
 #include <opencv2/core/core.hpp> // cv::Point3f
+#include <opencv2/imgcodecs.hpp> // cv::imread, cv::IMREAD_UNCHANGED
+#include <opencv2/imgproc.hpp>   // cv::resize
 
 #include "System.h"
+#include "ImuTypes.h"
+
 using namespace std;
 
 void LoadImages(const string &strImagePath, const string &strPathTimes,
@@ -16,7 +21,7 @@ void LoadIMU(const string &strImuPath,
              vector<cv::Point3f> &vAcc, 
              vector<cv::Point3f> &vGyro);
 
-
+double ttrack_tot = 0; // 计算追踪时间
 int main(int argc, char** argv)
 {
     if(argc < 5)
@@ -35,17 +40,17 @@ int main(int argc, char** argv)
         file_name = string(argv[argc-1]);
         cout << "file name: " << file_name << endl;
     }
-    // Load all sequences:
+    // ############### Load all sequences ###############
     int seq;
     vector< vector<string> > vstrImageFilenames; // 2D-vector, 每个seq的所有images路径
-    vector< vector<double> > vTimestampsCam;     // 2D-vector, 每个seq的所有时间戳
+    vector< vector<double> > vTimestampsCam;     // 2D-vector, 每个seq的所有时间戳, 单位: 秒
     vector< vector<cv::Point3f> > vAcc, vGyro;   // 2D-vector, 每个seq的所有IMU数据
-    vector< vector<double> > vTimestampsImu;     // 2D-vector, 每个seq的所有IMU时间戳
+    vector< vector<double> > vTimestampsImu;     // 2D-vector, 每个seq的所有IMU时间戳, 单位: 秒
     vector<int> nImages; // 图片数量
     vector<int> nImu;    // IMU 数据条数
-    vector<int> first_imu(num_seq,0);
+    vector<int> first_imu(num_seq,0); 
 
-    // 把所有 vector 容器 resize 成 seq 的数量
+    // ############### 把所有 vector 容器resize成seq的数量 ###############
     vstrImageFilenames.resize(num_seq);
     vTimestampsCam.resize(num_seq);
     vAcc.resize(num_seq);
@@ -55,6 +60,7 @@ int main(int argc, char** argv)
     nImu.resize(num_seq);
 
     int tot_images = 0;
+    // 读取每个 seq 的数据
     for (seq = 0; seq<num_seq; seq++)
     {
 
@@ -63,12 +69,12 @@ int main(int argc, char** argv)
 
         string pathCam0 = pathSeq + "/mav0/cam0/data";
         string pathImu = pathSeq + "/mav0/imu0/data.csv";
-        // Check the path and filename
-        printf("Please check the path: \n");
-        printf("    pathSeq       : %s\n", pathSeq.c_str());
-        printf("    pathTimeStamps: %s\n", pathTimeStamps.c_str());
-        printf("    pathCam0      : %s\n", pathCam0.c_str());
-        printf("    pathImu       : %s\n", pathImu.c_str());
+
+        // ############### Check the path and filename ###############
+        printf("pathSeq       : %s\n", pathSeq.c_str());
+        printf("pathTimeStamps: %s\n", pathTimeStamps.c_str());
+        printf("pathCam0      : %s\n", pathCam0.c_str());
+        printf("pathImu       : %s\n", pathImu.c_str());
 
         cout << "Loading images for sequence " << seq << "...";
         LoadImages(pathCam0, pathTimeStamps, vstrImageFilenames[seq], vTimestampsCam[seq]);
@@ -94,14 +100,114 @@ int main(int argc, char** argv)
         first_imu[seq]--; // first imu measurement to be considered
     }
     // Vector for tracking time statistics
-    vector<float> vTimesTrack; // TODO
-    vTimesTrack.resize(tot_images); 
+    vector<float> vTimesTrack;
+    vTimesTrack.resize(tot_images);
 
-    cout.precision(17); // TODO
+    cout.precision(17);
 
-    // Create SLAM system. It initializes all system threads and gets ready to process frames.
-    // ORB_SLAM3::System SLAM(argv[1],argv[2],ORB_SLAM3::System::IMU_MONOCULAR, true);
+    // 创建 ORB-SLAM3 系统, 初始化
     ORB_SLAM3::System SLAM(argv[1],argv[2],ORB_SLAM3::System::IMU_MONOCULAR, false);
+
+    float imageScale = SLAM.GetImageScale();
+
+    double t_resize = 0.f;
+    double t_track = 0.f;
+    
+    int proccIm=0;
+    for (seq = 0; seq<num_seq; seq++)
+    {
+        // Main loop
+        cv::Mat im;
+        vector<ORB_SLAM3::IMU::Point> vImuMeas; // vector IMU measurements 测量结果
+        proccIm = 0;
+        for(int ni=0; ni<nImages[seq]; ni++, proccIm++)
+        {
+            // 从之前存的图片路径vector取图片读取
+            im = cv::imread(vstrImageFilenames[seq][ni],cv::IMREAD_UNCHANGED); //CV_LOAD_IMAGE_UNCHANGED);
+
+            double tframe = vTimestampsCam[seq][ni]; // tframe 是时间戳
+
+            if(im.empty()) // 读取失败判断
+            {
+                cerr << endl << "Failed to load image at: "
+                     <<  vstrImageFilenames[seq][ni] << endl;
+                return 1;
+            }
+
+            if(imageScale != 1.f) // 如果图片有缩放, 对图片进行缩放
+            {
+                int width = im.cols * imageScale;
+                int height = im.rows * imageScale;
+                cv::resize(im, im, cv::Size(width, height));
+            }
+
+            // ############### 把 ni 帧前的所有 IMU 数据读入 vImuMeas ###############
+            vImuMeas.clear();
+            if(ni>0)
+            {
+                while(vTimestampsImu[seq][first_imu[seq]]<=vTimestampsCam[seq][ni])
+                {
+                    vImuMeas.push_back(ORB_SLAM3::IMU::Point(vAcc[seq][first_imu[seq]].x,vAcc[seq][first_imu[seq]].y,vAcc[seq][first_imu[seq]].z,
+                                                             vGyro[seq][first_imu[seq]].x,vGyro[seq][first_imu[seq]].y,vGyro[seq][first_imu[seq]].z,
+                                                             vTimestampsImu[seq][first_imu[seq]]));
+                    first_imu[seq]++;
+                }
+            }
+
+            std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
+
+            // Pass the image to the SLAM system
+            // cout << "tframe = " << tframe << endl;
+            SLAM.TrackMonocular(im,tframe,vImuMeas); // TODO change to monocular_inertial
+            sleep(2); // 模拟Tracking过程, 假设需要2s
+            printf("%4d/%d: tframe: %lf, vTimestampsCam[seq][ni]:%lf\n", ni, nImages[seq], tframe, vTimestampsCam[seq][ni]);
+
+            std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
+
+            double ttrack= std::chrono::duration_cast<std::chrono::duration<double> >(t2 - t1).count();
+            printf("Tracking Time Cost: %lfs\n\n", ttrack);
+            ttrack_tot += ttrack;
+            // std::cout << "ttrack: " << ttrack << std::endl;
+
+            vTimesTrack[ni]=ttrack;
+
+            // ############### 等待下一帧 ###############
+            double T=0; // 计算每两帧之间, 时间戳上的间隔
+            if(ni<nImages[seq]-1) // 整个seq的除了最后一帧, 其它image都执行
+                T = vTimestampsCam[seq][ni+1]-tframe;
+            else if(ni>0) // 针对最后一帧
+                T = tframe-vTimestampsCam[seq][ni-1];
+
+            // TODO: 如果Tracking时间小于两帧间隔时间, 需要等待?
+            if(ttrack<T)
+                usleep((T-ttrack)*1e6); // 1 seconds = 1e6 microseconds
+        }
+        if(seq < num_seq - 1)
+        {
+            cout << "Changing the dataset" << endl;
+
+            SLAM.ChangeDataset();
+        }
+    }
+
+    // Stop all threads
+    SLAM.Shutdown();
+
+    // Save camera trajectory
+    if (bFileName)
+    {
+        const string kf_file =  "kf_" + string(argv[argc-1]) + ".txt";
+        const string f_file =  "f_" + string(argv[argc-1]) + ".txt";
+        SLAM.SaveTrajectoryEuRoC(f_file);
+        SLAM.SaveKeyFrameTrajectoryEuRoC(kf_file);
+    }
+    else
+    {
+        SLAM.SaveTrajectoryEuRoC("CameraTrajectory.txt");
+        SLAM.SaveKeyFrameTrajectoryEuRoC("KeyFrameTrajectory.txt");
+    }
+
+    return 0;
 }
 
 

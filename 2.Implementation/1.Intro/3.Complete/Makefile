@@ -8,10 +8,11 @@ ORB := lib/libORB_SLAM3.so
 cc_srcs := $(shell find src -name "*.cc")
 cc_objs := $(patsubst src/%.cc,objs/%.o,$(cc_srcs))
 
-include_dirs := ./include /usr/include/eigen3 $(OpenCV_INCLUDE)
-linking_libs := ORB_SLAM3 $(OpenCV_LIBS)  
-library_dirs := ./lib $(OpenCV_LIB_DIR)
+include_dirs := include $(OpenCV_INCLUDE)
+linking_libs := $(OpenCV_LIBS)
 
+static_lib_dirs  := $(OpenCV_LIB_DIR)
+dynamic_lib_dirs := $(OpenCV_LIB_DIR)
 
 I_options := $(include_dirs:%=-I%)
 l_options := $(linking_libs:%=-l%)
@@ -40,10 +41,13 @@ objs/$(TARGET).o : $(MAIN)
 	@mkdir -p $(dir $@)
 	@g++ -c $< -o $@ $(compile_options)
 
-Examples/$(TARGET) : objs/$(TARGET).o $(ORB)
+Examples/$(TARGET) : objs/$(TARGET).o 
 	@echo [INFO]: Link $^ to $@
 	@mkdir -p $(dir $@)
-	@g++ $< -o $@ $(linking_options)
+	@g++ $^ -o $@ $(linking_options)
+
+
+
 
 
 run : Examples/$(TARGET)

@@ -41,7 +41,7 @@ int main(int argc, char** argv)
     vector< vector<double> > vTimestampsImu;     // 2D-vector, 每个seq的所有IMU时间戳
     vector<int> nImages; // 图片数量
     vector<int> nImu;    // IMU 数据条数
-    vector<int> first_imu(num_seq,0);
+    vector<int> first_imu(num_seq,0); // vector(n, elem);构造函数将n个elem拷贝给本身
 
     // 把所有 vector 容器 resize 成 seq 的数量
     vstrImageFilenames.resize(num_seq);
@@ -86,10 +86,11 @@ int main(int argc, char** argv)
             return 1;
         }
 
-        // Find first imu to be considered, supposing imu measurements start first
+        // 找到每个seq中最后一个小于或者等于 Cam 时间戳的 IMU 时间
         while(vTimestampsImu[seq][first_imu[seq]]<=vTimestampsCam[seq][0])
             first_imu[seq]++;
         first_imu[seq]--; // first imu measurement to be considered
+        printf("first imu measurement to be considered: %d, %f\n", first_imu[seq], vTimestampsImu[seq][first_imu[seq]]);
     }
 }
 

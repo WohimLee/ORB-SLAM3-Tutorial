@@ -2,7 +2,6 @@
 #include "System.h"
 #include "Converter.h"
 #include <thread>
-#include <pangolin/pangolin.h>
 #include <iomanip>
 #include <openssl/md5.h>
 #include <boost/serialization/base_object.hpp>
@@ -159,66 +158,66 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
     }
 
 
-    if (mSensor==IMU_STEREO || mSensor==IMU_MONOCULAR || mSensor==IMU_RGBD)
-        mpAtlas->SetInertialSensor();
+    // if (mSensor==IMU_STEREO || mSensor==IMU_MONOCULAR || mSensor==IMU_RGBD)
+    //     mpAtlas->SetInertialSensor();
 
-    //Create Drawers. These are used by the Viewer
-    mpFrameDrawer = new FrameDrawer(mpAtlas);
-    mpMapDrawer = new MapDrawer(mpAtlas, strSettingsFile, settings_);
+    // //Create Drawers. These are used by the Viewer
+    // mpFrameDrawer = new FrameDrawer(mpAtlas);
+    // mpMapDrawer = new MapDrawer(mpAtlas, strSettingsFile, settings_);
 
-    //Initialize the Tracking thread
-    //(it will live in the main thread of execution, the one that called this constructor)
-    cout << "Seq. Name: " << strSequence << endl;
-    mpTracker = new Tracking(this, mpVocabulary, mpFrameDrawer, mpMapDrawer,
-                             mpAtlas, mpKeyFrameDatabase, strSettingsFile, mSensor, settings_, strSequence);
+    // //Initialize the Tracking thread
+    // //(it will live in the main thread of execution, the one that called this constructor)
+    // cout << "Seq. Name: " << strSequence << endl;
+    // mpTracker = new Tracking(this, mpVocabulary, mpFrameDrawer, mpMapDrawer,
+    //                          mpAtlas, mpKeyFrameDatabase, strSettingsFile, mSensor, settings_, strSequence);
 
-    //Initialize the Local Mapping thread and launch
-    mpLocalMapper = new LocalMapping(this, mpAtlas, mSensor==MONOCULAR || mSensor==IMU_MONOCULAR,
-                                     mSensor==IMU_MONOCULAR || mSensor==IMU_STEREO || mSensor==IMU_RGBD, strSequence);
-    mptLocalMapping = new thread(&ORB_SLAM3::LocalMapping::Run,mpLocalMapper);
-    mpLocalMapper->mInitFr = initFr;
-    if(settings_)
-        mpLocalMapper->mThFarPoints = settings_->thFarPoints();
-    else
-        mpLocalMapper->mThFarPoints = fsSettings["thFarPoints"];
-    if(mpLocalMapper->mThFarPoints!=0)
-    {
-        cout << "Discard points further than " << mpLocalMapper->mThFarPoints << " m from current camera" << endl;
-        mpLocalMapper->mbFarPoints = true;
-    }
-    else
-        mpLocalMapper->mbFarPoints = false;
+    // //Initialize the Local Mapping thread and launch
+    // mpLocalMapper = new LocalMapping(this, mpAtlas, mSensor==MONOCULAR || mSensor==IMU_MONOCULAR,
+    //                                  mSensor==IMU_MONOCULAR || mSensor==IMU_STEREO || mSensor==IMU_RGBD, strSequence);
+    // mptLocalMapping = new thread(&ORB_SLAM3::LocalMapping::Run,mpLocalMapper);
+    // mpLocalMapper->mInitFr = initFr;
+    // if(settings_)
+    //     mpLocalMapper->mThFarPoints = settings_->thFarPoints();
+    // else
+    //     mpLocalMapper->mThFarPoints = fsSettings["thFarPoints"];
+    // if(mpLocalMapper->mThFarPoints!=0)
+    // {
+    //     cout << "Discard points further than " << mpLocalMapper->mThFarPoints << " m from current camera" << endl;
+    //     mpLocalMapper->mbFarPoints = true;
+    // }
+    // else
+    //     mpLocalMapper->mbFarPoints = false;
 
-    //Initialize the Loop Closing thread and launch
-    // mSensor!=MONOCULAR && mSensor!=IMU_MONOCULAR
-    mpLoopCloser = new LoopClosing(mpAtlas, mpKeyFrameDatabase, mpVocabulary, mSensor!=MONOCULAR, activeLC); // mSensor!=MONOCULAR);
-    mptLoopClosing = new thread(&ORB_SLAM3::LoopClosing::Run, mpLoopCloser);
+    // //Initialize the Loop Closing thread and launch
+    // // mSensor!=MONOCULAR && mSensor!=IMU_MONOCULAR
+    // mpLoopCloser = new LoopClosing(mpAtlas, mpKeyFrameDatabase, mpVocabulary, mSensor!=MONOCULAR, activeLC); // mSensor!=MONOCULAR);
+    // mptLoopClosing = new thread(&ORB_SLAM3::LoopClosing::Run, mpLoopCloser);
 
-    //Set pointers between threads
-    mpTracker->SetLocalMapper(mpLocalMapper);
-    mpTracker->SetLoopClosing(mpLoopCloser);
+    // //Set pointers between threads
+    // mpTracker->SetLocalMapper(mpLocalMapper);
+    // mpTracker->SetLoopClosing(mpLoopCloser);
 
-    mpLocalMapper->SetTracker(mpTracker);
-    mpLocalMapper->SetLoopCloser(mpLoopCloser);
+    // mpLocalMapper->SetTracker(mpTracker);
+    // mpLocalMapper->SetLoopCloser(mpLoopCloser);
 
-    mpLoopCloser->SetTracker(mpTracker);
-    mpLoopCloser->SetLocalMapper(mpLocalMapper);
+    // mpLoopCloser->SetTracker(mpTracker);
+    // mpLoopCloser->SetLocalMapper(mpLocalMapper);
 
-    //usleep(10*1000*1000);
+    // //usleep(10*1000*1000);
 
-    //Initialize the Viewer thread and launch
-    if(bUseViewer)
-    //if(false) // TODO
-    {
-        mpViewer = new Viewer(this, mpFrameDrawer,mpMapDrawer,mpTracker,strSettingsFile,settings_);
-        mptViewer = new thread(&Viewer::Run, mpViewer);
-        mpTracker->SetViewer(mpViewer);
-        mpLoopCloser->mpViewer = mpViewer;
-        mpViewer->both = mpFrameDrawer->both;
-    }
+    // //Initialize the Viewer thread and launch
+    // if(bUseViewer)
+    // //if(false) // TODO
+    // {
+    //     mpViewer = new Viewer(this, mpFrameDrawer,mpMapDrawer,mpTracker,strSettingsFile,settings_);
+    //     mptViewer = new thread(&Viewer::Run, mpViewer);
+    //     mpTracker->SetViewer(mpViewer);
+    //     mpLoopCloser->mpViewer = mpViewer;
+    //     mpViewer->both = mpFrameDrawer->both;
+    // }
 
-    // Fix verbosity
-    Verbose::SetTh(Verbose::VERBOSITY_QUIET);
+    // // Fix verbosity
+    // Verbose::SetTh(Verbose::VERBOSITY_QUIET);
 
 }
 

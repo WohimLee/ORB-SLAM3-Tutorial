@@ -1,5 +1,5 @@
 
-ROOT := /home/nerf/datav/SLAM/ORB_SLAM3/Thirdparty/
+ROOT := /home/nerf/datav/SLAM/ORB_SLAM3/Thirdparty
 
 Sophus_INCLUDE := $(ROOT)/Sophus
 Sophus_LIB_DIR := 

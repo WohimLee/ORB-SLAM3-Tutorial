@@ -1,4 +1,4 @@
-ROOT := /home/nerf/datav/SLAM/ORB_SLAM3/Thirdparty/
+ROOT := /home/nerf/datav/SLAM/ORB_SLAM3/Thirdparty
 
 g2o_INCLUDE := $(ROOT)/g2o
 g2o_LIB_DIR := 

@@ -1,4 +1,4 @@
-ROOT := /home/nerf/datav/SLAM/ORB_SLAM3/Thirdparty/
+ROOT := /home/nerf/datav/SLAM/ORB_SLAM3/Thirdparty
 
 DBoW2_INCLUDE := $(ROOT)/DBoW2
 DBoW2_LIB_DIR := $(ROOT)/lib

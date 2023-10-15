@@ -29,5 +29,45 @@ System::System(const string &strVocFile, const string &strSettingsFile, const eS
         cout << "Stereo-Inertial" << endl;
     else if(mSensor==IMU_RGBD)
         cout << "RGB-D-Inertial" << endl;
+    
+
+    //Check settings file
+    cv::FileStorage fsSettings(strSettingsFile.c_str(), cv::FileStorage::READ);
+    if(!fsSettings.isOpened())
+    {
+       cerr << "Failed to open settings file at: " << strSettingsFile << endl;
+       exit(-1);
+    }
+
+    cv::FileNode node = fsSettings["File.version"];
+    if(!node.empty() && node.isString() && node.string() == "1.0"){
+        settings_ = new Settings(strSettingsFile,mSensor);
+
+        mStrLoadAtlasFromFile = settings_->atlasLoadFile();
+        mStrSaveAtlasToFile = settings_->atlasSaveFile();
+
+        cout << (*settings_) << endl;
+    }
+    else{
+        settings_ = nullptr;
+        cv::FileNode node = fsSettings["System.LoadAtlasFromFile"];
+        if(!node.empty() && node.isString())
+        {
+            mStrLoadAtlasFromFile = (string)node;
+        }
+
+        node = fsSettings["System.SaveAtlasToFile"];
+        if(!node.empty() && node.isString())
+        {
+            mStrSaveAtlasToFile = (string)node;
+        }
+    }
+
+    node = fsSettings["loopClosing"];
+    bool activeLC = true;
+    if(!node.empty())
+    {
+        activeLC = static_cast<int>(fsSettings["loopClosing"]) != 0;
+    }
 }
 }

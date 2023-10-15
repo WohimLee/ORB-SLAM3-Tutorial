@@ -4,6 +4,7 @@
         "*.py": "python",
         "config": "django-html",
         "fstream": "cpp",
-        "chrono": "cpp"
+        "chrono": "cpp",
+        "geometry": "cpp"
     }
 }

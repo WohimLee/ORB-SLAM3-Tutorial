@@ -23,11 +23,11 @@
 #include<opencv2/core/core.hpp>
 
 #include<Eigen/Dense>
-#include"g2o/g2o/types/types_six_dof_expmap.h"
-#include"g2o/g2o/types/types_seven_dof_expmap.h"
+#include"g2o/types/types_six_dof_expmap.h"
+#include"g2o/types/types_seven_dof_expmap.h"
 
-#include "Sophus/sophus/geometry.hpp"
-#include "Sophus/sophus/sim3.hpp"
+#include "sophus/geometry.hpp"
+#include "sophus/sim3.hpp"
 
 namespace ORB_SLAM3
 {

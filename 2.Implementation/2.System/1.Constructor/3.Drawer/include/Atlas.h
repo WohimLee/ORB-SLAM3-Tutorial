@@ -22,6 +22,7 @@ public:
     Atlas(int initKFid); // When its initialization the first map is created
     ~Atlas();
     void CreateNewMap();
+    void SetInertialSensor();
 
 }; // Atlas
 } // ORB_SLAM3

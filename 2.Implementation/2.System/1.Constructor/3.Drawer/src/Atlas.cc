@@ -20,6 +20,8 @@ Atlas::~Atlas()
 }
 
 void Atlas::CreateNewMap(){}
+
+void Atlas::SetInertialSensor(){}
 }
 
 

@@ -2,11 +2,14 @@
 
 # Files
 *.o
+*.so
+*.a
 .DS_Store
 exec
-*.so
+mono_inertial_euroc
 
 # Folders
 objs
 lib
 Test
+workspace

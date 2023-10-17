@@ -1,28 +1,20 @@
 #include <iostream>
 #include <thread>
-#include <vector>
-#include <mutex>
 
-std::mutex mtx; // Mutex for critical section
-
-void printHello(int id) {
-    mtx.lock();
-    std::cout << "Hello from thread " << id << "!\n";
-    mtx.unlock();
+void func(int &a, int b){
+    b = a;
+    printf("Runing thread: 1\n");
 }
 
-int main() {
-    std::vector<std::thread> threads;
 
-    // Launch multiple threads
-    for (int i = 0; i < 5; ++i) {
-        threads.push_back(std::thread(printHello, i));
-    }
+int main(int argc, char** argv)
+{
+    printf("Running Main Thread...\n");
+    int a = 888;
+    int b = 999;
+    std::thread t(func, std::ref(a), b);
 
-    // Join the threads to the main thread
-    for (auto& th : threads) {
-        th.join();
-    }
+    t.join();
 
-    return 0;
+    return  0;
 }

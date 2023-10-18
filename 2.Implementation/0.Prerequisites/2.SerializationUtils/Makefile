@@ -1,8 +1,9 @@
 include mks/OpenCV.mk
+include mks/Eigen.mk
 include mks/Sophus.mk
 
 
-MAIN := ./Examples/example1.cc
+MAIN := ./Examples/mono_inertial_euroc.cc
 TARGET := $(basename $(notdir $(MAIN)))
 ORB := lib/libORB_SLAM3.so
 
@@ -10,9 +11,9 @@ ORB := lib/libORB_SLAM3.so
 cc_srcs := $(shell find src -name "*.cc")
 cc_objs := $(patsubst src/%.cc,objs/%.o,$(cc_srcs))
 
-include_dirs := include /usr/include/eigen3 $(OpenCV_INCLUDE) $(Sophus_INCLUDE)
-linking_libs := $(OpenCV_LIBS) 
-library_dirs := lib $(OpenCV_LIB_DIR)
+include_dirs := include $(Eigen_INCLUDE) $(OpenCV_INCLUDE)  $(Sophus_INCLUDE) 
+linking_libs := $(OpenCV_LIBS) $(g2o_LIBS)
+library_dirs := lib $(OpenCV_LIB_DIR) $(DBoW2_LIB_DIR) $(g2o_LIB_DIR)
 
 
 I_options := $(include_dirs:%=-I%)
@@ -21,7 +22,7 @@ L_options := $(library_dirs:%=-L%)
 r_options := $(library_dirs:%=-Wl,-rpath=%)
 
 
-compile_options := -std=c++11 -fPIC $(I_options)
+compile_options := -std=c++11 -fPIC -w $(I_options)
 linking_options := $(l_options) $(L_options) $(r_options)
 
 # Compile ORB lib
@@ -42,7 +43,7 @@ objs/$(TARGET).o : $(MAIN)
 	@mkdir -p $(dir $@)
 	@g++ -c $< -o $@ $(compile_options)
 
-Examples/$(TARGET) : objs/$(TARGET).o
+Examples/$(TARGET) : objs/$(TARGET).o 
 	@echo [INFO]: Link $^ to $@
 	@mkdir -p $(dir $@)
 	@g++ $< -o $@ $(linking_options)
@@ -63,7 +64,5 @@ clean :
 	@rm -rf objs Examples/$(TARGET)
 
 debug :
-	@echo $(OpenCV_LIBS)
+	@echo $(DBoW2_LIBS)
 
-
-.PHONY : clean debug run

@@ -36,7 +36,7 @@
 
 #include <Eigen/Geometry>
 
-#include "Converter.h"
+// #include "Converter.h" // 没用上
 #include "GeometricTools.h"
 
 namespace ORB_SLAM3 {
@@ -98,7 +98,7 @@ namespace ORB_SLAM3 {
         static long unsigned int nNextId;
 
     protected:
-        std::vector<float> mvParameters;
+        std::vector<float> mvParameters; // fx, fy, cx, cy
 
         unsigned int mnId;
 

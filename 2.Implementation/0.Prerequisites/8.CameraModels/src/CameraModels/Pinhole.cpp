@@ -25,8 +25,10 @@
 namespace ORB_SLAM3 {
 //BOOST_CLASS_EXPORT_GUID(Pinhole, "Pinhole")
 
-    long unsigned int GeometricCamera::nNextId=0;
+    long unsigned int GeometricCamera::nNextId=0; // 静态成员变量必须类外初始化
 
+    // ########### project 系列函数就是将Camera坐标转成Pixel坐标 ###########
+    // mvParameters: fx, fy, cx, cy
     cv::Point2f Pinhole::project(const cv::Point3f &p3D) {
         return cv::Point2f(mvParameters[0] * p3D.x / p3D.z + mvParameters[2],
                            mvParameters[1] * p3D.y / p3D.z + mvParameters[3]);
@@ -58,6 +60,7 @@ namespace ORB_SLAM3 {
         return 1.0;
     }
 
+    // ########### unproject 系列函数就是将Pixel坐标转换成Camera坐标
     Eigen::Vector3f Pinhole::unprojectEig(const cv::Point2f &p2D) {
         return Eigen::Vector3f((p2D.x - mvParameters[2]) / mvParameters[0], (p2D.y - mvParameters[3]) / mvParameters[1],
                            1.f);
@@ -90,7 +93,7 @@ namespace ORB_SLAM3 {
         return tvr->Reconstruct(vKeys1,vKeys2,vMatches12,T21,vP3D,vbTriangulated);
     }
 
-
+    // 将mvParameters的值转成相机内参矩阵
     cv::Mat Pinhole::toK() {
         cv::Mat K = (cv::Mat_<float>(3, 3)
                 << mvParameters[0], 0.f, mvParameters[2], 0.f, mvParameters[1], mvParameters[3], 0.f, 0.f, 1.f);
@@ -103,7 +106,7 @@ namespace ORB_SLAM3 {
         return K;
     }
 
-
+    // 对极几何约束
     bool Pinhole::epipolarConstrain(GeometricCamera* pCamera2,  const cv::KeyPoint &kp1, const cv::KeyPoint &kp2, const Eigen::Matrix3f& R12, const Eigen::Vector3f& t12, const float sigmaLevel, const float unc) {
         //Compute Fundamental Matrix
         Eigen::Matrix3f t12x = Sophus::SO3f::hat(t12);
@@ -128,6 +131,7 @@ namespace ORB_SLAM3 {
         return dsqr<3.84*unc;
     }
 
+    // ########### 运算符重载 ###########
     std::ostream & operator<<(std::ostream &os, const Pinhole &ph) {
         os << ph.mvParameters[0] << " " << ph.mvParameters[1] << " " << ph.mvParameters[2] << " " << ph.mvParameters[3];
         return os;
@@ -144,6 +148,7 @@ namespace ORB_SLAM3 {
         return is;
     }
 
+    // 
     bool Pinhole::IsEqual(GeometricCamera* pCam)
     {
         if(pCam->GetType() != GeometricCamera::CAM_PINHOLE)

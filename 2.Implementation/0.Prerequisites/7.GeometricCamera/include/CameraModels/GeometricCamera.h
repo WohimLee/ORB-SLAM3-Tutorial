@@ -41,7 +41,7 @@
 
 namespace ORB_SLAM3 {
     class GeometricCamera {
-
+        // 序列化
         friend class boost::serialization::access;
 
         template<class Archive>
@@ -98,11 +98,11 @@ namespace ORB_SLAM3 {
         static long unsigned int nNextId;
 
     protected:
-        std::vector<float> mvParameters;
+        std::vector<float> mvParameters; // fx, fy, cx, cy
 
         unsigned int mnId;
 
-        unsigned int mnType;
+        unsigned int mnType; // CAM_PINHOLE, CAM_FISHEYE
     };
 }
 

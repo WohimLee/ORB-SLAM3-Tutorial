@@ -27,9 +27,9 @@
 
 namespace ORB_SLAM3 {
     class Pinhole : public GeometricCamera {
-
+    
+    // 序列化的操作
     friend class boost::serialization::access; // 可以访问 private 域
-
     template<class Archive>
     void serialize(Archive& ar, const unsigned int version)
     {
@@ -43,17 +43,17 @@ namespace ORB_SLAM3 {
             mnType = CAM_PINHOLE;
         }
         Pinhole(const std::vector<float> _vParameters) : GeometricCamera(_vParameters), tvr(nullptr) {
-            assert(mvParameters.size() == 4);
+            assert(mvParameters.size() == 4); // fx, fy, cx, cy
             mnId=nNextId++;
             mnType = CAM_PINHOLE;
         }
-
+        // 拷贝构造函数
         Pinhole(Pinhole* pPinhole) : GeometricCamera(pPinhole->mvParameters), tvr(nullptr) {
             assert(mvParameters.size() == 4);
             mnId=nNextId++;
             mnType = CAM_PINHOLE;
         }
-
+        // 析构函数
         ~Pinhole(){
             if(tvr) delete tvr;
         }
@@ -76,7 +76,7 @@ namespace ORB_SLAM3 {
 
         cv::Mat toK();
         Eigen::Matrix3f toK_();
-
+        // 对极几何约束
         bool epipolarConstrain(GeometricCamera* pCamera2, const cv::KeyPoint& kp1, const cv::KeyPoint& kp2, const Eigen::Matrix3f& R12, const Eigen::Vector3f& t12, const float sigmaLevel, const float unc);
 
         bool matchAndtriangulate(const cv::KeyPoint& kp1, const cv::KeyPoint& kp2, GeometricCamera* pOther,

@@ -5,7 +5,7 @@ include mks/Sophus.mk
 include mks/g2o.mk
 
 
-
+# MAIN := ./Examples/example1.cc
 MAIN := ./Examples/mono_inertial_euroc.cc
 TARGET := $(basename $(notdir $(MAIN)))
 ORB := lib/libORB_SLAM3.so
@@ -64,7 +64,7 @@ run : Examples/$(TARGET)
 		dataset-MH01_monoi
 
 clean :
-	@rm -rf objs Examples/$(TARGET)
+	@rm -rf lib objs Examples/$(TARGET)
 
 debug :
 	@echo $(DBoW2_LIBS)

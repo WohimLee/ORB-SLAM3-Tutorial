@@ -1,0 +1,23 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "include/**",
+                "/usr/include/**",
+                "/home/nerf/datav/SLAM/ORB_SLAM3/Thirdparty/Sophus/**",
+                "/home/nerf/datav/SLAM/ORB_SLAM3/Thirdparty/DBoW2/**",
+                "/home/nerf/datav/SLAM/ORB_SLAM3/Thirdparty/g2o/**",
+                "/home/nerf/datav/3rdParty/opencv-4.5.1/include/opencv4/**"
+
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c17",
+            "cppStandard": "gnu++14",
+            "intelliSenseMode": "linux-gcc-x64"
+        }
+    ],
+    "version": 4
+}

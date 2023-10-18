@@ -2,6 +2,8 @@ include mks/OpenCV.mk
 include mks/Eigen.mk
 include mks/DBoW2.mk
 include mks/Sophus.mk
+include mks/g2o.mk
+
 
 
 MAIN := ./Examples/mono_inertial_euroc.cc
@@ -12,9 +14,9 @@ ORB := lib/libORB_SLAM3.so
 cc_srcs := $(shell find src -name "*.cc")
 cc_objs := $(patsubst src/%.cc,objs/%.o,$(cc_srcs))
 
-include_dirs := include $(Eigen_INCLUDE) $(OpenCV_INCLUDE) $(DBoW2_INCLUDE) $(Sophus_INCLUDE)
-linking_libs := ORB_SLAM3 $(OpenCV_LIBS) $(DBoW2_LIBS) 
-library_dirs := lib $(OpenCV_LIB_DIR) $(DBoW2_LIB_DIR)
+include_dirs := include $(Eigen_INCLUDE) $(OpenCV_INCLUDE) $(DBoW2_INCLUDE) $(Sophus_INCLUDE) $(g2o_INCLUDE)
+linking_libs := ORB_SLAM3 $(OpenCV_LIBS) $(DBoW2_LIBS) $(g2o_LIBS)
+library_dirs := lib $(OpenCV_LIB_DIR) $(DBoW2_LIB_DIR) $(g2o_LIB_DIR)
 
 
 I_options := $(include_dirs:%=-I%)

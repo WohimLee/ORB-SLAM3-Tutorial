@@ -5,6 +5,7 @@
 #include "System.h"
 #include "Settings.h"
 #include <iostream>
+#include <opencv2/imgproc/imgproc.hpp> // cv::resize
 
 using namespace std;
 
@@ -215,6 +216,19 @@ Sophus::SE3f System::TrackMonocular(const cv::Mat &im, const double &timestamp, 
         unique_lock<mutex> lock(mMutexReset);
         if(mbShutDown)
             return Sophus::SE3f();
+    }
+
+    if(mSensor!=MONOCULAR && mSensor!=IMU_MONOCULAR)
+    {
+        cerr << "ERROR: you called TrackMonocular but input sensor was not set to Monocular nor Monocular-Inertial." << endl;
+        exit(-1);
+    }
+
+    cv::Mat imToFeed = im.clone();
+    if(settings_ && settings_->needToResize()){
+        cv::Mat resizedIm;
+        cv::resize(im,resizedIm,settings_->newImSize());
+        imToFeed = resizedIm;
     }
 }
 

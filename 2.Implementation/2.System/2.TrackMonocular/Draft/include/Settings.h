@@ -1,18 +1,34 @@
-
+/**
+* This file is part of ORB-SLAM3
+*
+* Copyright (C) 2017-2021 Carlos Campos, Richard Elvira, Juan J. Gómez Rodríguez, José M.M. Montiel and Juan D. Tardós, University of Zaragoza.
+* Copyright (C) 2014-2016 Raúl Mur-Artal, José M.M. Montiel and Juan D. Tardós, University of Zaragoza.
+*
+* ORB-SLAM3 is free software: you can redistribute it and/or modify it under the terms of the GNU General Public
+* License as published by the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* ORB-SLAM3 is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
+* the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License along with ORB-SLAM3.
+* If not, see <http://www.gnu.org/licenses/>.
+*/
 
 #ifndef ORB_SLAM3_SETTINGS_H
 #define ORB_SLAM3_SETTINGS_H
 
 
+// Flag to activate the measurement of time in each process (track,localmap, place recognition).
+//#define REGISTER_TIMES
+
+#include "CameraModels/GeometricCamera.h"
 
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
-
-// 增加
-#include <iostream>
-#include <opencv2/core/core.hpp>
 
 namespace ORB_SLAM3 {
 
@@ -36,8 +52,9 @@ namespace ORB_SLAM3 {
          */
         Settings() = delete;
 
-        // Constructor from file
-
+        /*
+         * Constructor from file
+         */
         Settings(const std::string &configFile, const int& sensor);
 
         /*
@@ -49,11 +66,12 @@ namespace ORB_SLAM3 {
          * Getter methods
          */
         CameraType cameraType() {return cameraType_;}
-
+        GeometricCamera* camera1() {return calibration1_;}
+        GeometricCamera* camera2() {return calibration2_;}
         cv::Mat camera1DistortionCoef() {return cv::Mat(vPinHoleDistorsion1_.size(),1,CV_32F,vPinHoleDistorsion1_.data());}
         cv::Mat camera2DistortionCoef() {return cv::Mat(vPinHoleDistorsion2_.size(),1,CV_32F,vPinHoleDistorsion1_.data());}
 
-
+        Sophus::SE3f Tlr() {return Tlr_;}
         float bf() {return bf_;}
         float b() {return b_;}
         float thDepth() {return thDepth_;}
@@ -71,6 +89,7 @@ namespace ORB_SLAM3 {
         float gyroWalk() {return gyroWalk_;}
         float accWalk() {return accWalk_;}
         float imuFrequency() {return imuFrequency_;}
+        Sophus::SE3f Tbc() {return Tbc_;}
         bool insertKFsWhenLost() {return insertKFsWhenLost_;}
 
         float depthMapFactor() {return depthMapFactor_;}
@@ -140,6 +159,11 @@ namespace ORB_SLAM3 {
         int sensor_;
         CameraType cameraType_;     //Camera type
 
+        /*
+         * Visual stuff
+         */
+        GeometricCamera* calibration1_, *calibration2_;   //Camera calibration
+        GeometricCamera* originalCalib1_, *originalCalib2_;
         std::vector<float> vPinHoleDistorsion1_, vPinHoleDistorsion2_;
 
         cv::Size originalImSize_, newImSize_;
@@ -150,6 +174,7 @@ namespace ORB_SLAM3 {
         bool bNeedToRectify_;
         bool bNeedToResize1_, bNeedToResize2_;
 
+        Sophus::SE3f Tlr_;
         float thDepth_;
         float bf_, b_;
 
@@ -165,6 +190,7 @@ namespace ORB_SLAM3 {
         float noiseGyro_, noiseAcc_;
         float gyroWalk_, accWalk_;
         float imuFrequency_;
+        Sophus::SE3f Tbc_;
         bool insertKFsWhenLost_;
 
         /*

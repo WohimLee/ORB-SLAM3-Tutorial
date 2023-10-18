@@ -28,7 +28,7 @@
 namespace ORB_SLAM3 {
     class Pinhole : public GeometricCamera {
 
-    friend class boost::serialization::access;
+    friend class boost::serialization::access; // 可以访问 private 域
 
     template<class Archive>
     void serialize(Archive& ar, const unsigned int version)
@@ -53,7 +53,6 @@ namespace ORB_SLAM3 {
             mnId=nNextId++;
             mnType = CAM_PINHOLE;
         }
-
 
         ~Pinhole(){
             if(tvr) delete tvr;

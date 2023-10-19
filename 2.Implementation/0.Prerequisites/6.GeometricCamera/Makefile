@@ -53,8 +53,6 @@ Examples/$(TARGET) : objs/$(TARGET).o $(ORB)
 
 
 
-
-
 run : Examples/$(TARGET)
 	@./$< \
 		/home/nerf/datav/SLAM/ORB_SLAM3/Vocabulary/ORBvoc.txt \
@@ -64,7 +62,7 @@ run : Examples/$(TARGET)
 		dataset-MH01_monoi
 
 clean :
-	@rm -rf objs Examples/$(TARGET)
+	@rm -rf lib objs Examples/$(TARGET)
 
 debug :
 	@echo $(DBoW2_LIBS)

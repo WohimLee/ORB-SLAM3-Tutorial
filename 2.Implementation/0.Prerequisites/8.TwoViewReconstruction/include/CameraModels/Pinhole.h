@@ -57,7 +57,8 @@ namespace ORB_SLAM3 {
         ~Pinhole(){
             if(tvr) delete tvr;
         }
-
+        // ########### project 系列函数就是将Camera坐标转成Pixel坐标 ###########
+        // mvParameters: fx, fy, cx, cy
         cv::Point2f project(const cv::Point3f &p3D);
         Eigen::Vector2d project(const Eigen::Vector3d & v3D);
         Eigen::Vector2f project(const Eigen::Vector3f & v3D);
@@ -65,19 +66,20 @@ namespace ORB_SLAM3 {
 
         float uncertainty2(const Eigen::Matrix<double,2,1> &p2D);
 
+        // ########### unproject 系列函数就是将Pixel坐标转换成Camera坐标
         Eigen::Vector3f unprojectEig(const cv::Point2f &p2D);
         cv::Point3f unproject(const cv::Point2f &p2D);
 
         Eigen::Matrix<double,2,3> projectJac(const Eigen::Vector3d& v3D);
 
-
-        bool ReconstructWithTwoViews(const std::vector<cv::KeyPoint>& vKeys1, const std::vector<cv::KeyPoint>& vKeys2, const std::vector<int> &vMatches12,
-                                             Sophus::SE3f &T21, std::vector<cv::Point3f> &vP3D, std::vector<bool> &vbTriangulated);
-
+        // 将mvParameters的值转成相机内参矩阵
         cv::Mat toK();
         Eigen::Matrix3f toK_();
         // 对极几何约束
-        bool epipolarConstrain(GeometricCamera* pCamera2, const cv::KeyPoint& kp1, const cv::KeyPoint& kp2, const Eigen::Matrix3f& R12, const Eigen::Vector3f& t12, const float sigmaLevel, const float unc);
+        bool epipolarConstrain(GeometricCamera* pCamera2, 
+                               const cv::KeyPoint& kp1, const cv::KeyPoint& kp2, 
+                               const Eigen::Matrix3f& R12, const Eigen::Vector3f& t12, // R, t 旋转, 平移
+                               const float sigmaLevel, const float unc);
 
         bool matchAndtriangulate(const cv::KeyPoint& kp1, const cv::KeyPoint& kp2, GeometricCamera* pOther,
                                  Sophus::SE3f& Tcw1, Sophus::SE3f& Tcw2,
@@ -88,6 +90,10 @@ namespace ORB_SLAM3 {
         friend std::istream& operator>>(std::istream& os, Pinhole& ph);
 
         bool IsEqual(GeometricCamera* pCam);
+
+        bool ReconstructWithTwoViews(const std::vector<cv::KeyPoint>& vKeys1, const std::vector<cv::KeyPoint>& vKeys2, const std::vector<int> &vMatches12,
+                                             Sophus::SE3f &T21, std::vector<cv::Point3f> &vP3D, std::vector<bool> &vbTriangulated);
+
     private:
         //Parameters vector corresponds to
         //      [fx, fy, cx, cy]

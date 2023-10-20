@@ -76,7 +76,7 @@ namespace ORB_SLAM3
         }
 
         // Generate sets of 8 points for each RANSAC iteration
-        mvSets = vector< vector<size_t> >(mMaxIterations,vector<size_t>(8,0));
+        mvSets = vector< vector<size_t> >(mMaxIterations,vector<size_t>(8,0)); // 2D vector, 1: mMaxIterations, 2: vector<size_t>(8,0)
 
         DUtils::Random::SeedRandOnce(0);
 
